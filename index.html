@@ -1,30 +1,148 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Moustafa Radwan | Cyber Security Explorer</title>
+    <title>Moustafa Radwan | Cyber Security</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0b10; color: #00ff41; text-align: center; padding: 50px; }
-        .container { border: 1px solid #00ff41; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
-        h1 { font-size: 2.5em; margin-bottom: 10px; }
-        p { color: #888; font-size: 1.2em; }
-        .email { font-weight: bold; color: #fff; margin-top: 20px; }
-        .social-links a { color: #00ff41; margin: 0 10px; text-decoration: none; border: 1px solid #00ff41; padding: 5px 15px; border-radius: 5px; }
-        .social-links a:hover { background: #00ff41; color: #000; }
+        :root {
+            --primary-color: #00ff41; /* Matrix Green */
+            --bg-color: #0d0d0d;
+            --glass-bg: rgba(0, 255, 65, 0.05);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* CRT Scanline Effect (شكل الشاشة القديمة) */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 3;
+            border: 1px solid var(--primary-color);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+            background: var(--glass-bg);
+            backdrop-filter: blur(5px);
+            max-width: 90%;
+            width: 400px;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        /* Typing Animation for Name */
+        .typing-effect {
+            font-size: 1.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 3px solid var(--primary-color);
+            width: 0;
+            margin: 0 auto 10px auto;
+            animation: typing 3s steps(30, end) forwards, blink 0.75s step-end infinite;
+        }
+
+        p {
+            color: #ccc;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: slideUp 1s ease-out 2.5s forwards; /* Starts after typing finishes */
+        }
+
+        .email {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 30px;
+            display: block;
+            opacity: 0;
+            animation: slideUp 1s ease-out 2.8s forwards;
+        }
+
+        /* Buttons Styling */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            opacity: 0;
+            animation: slideUp 1s ease-out 3s forwards;
+        }
+
+        .btn {
+            text-decoration: none;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-color);
+            color: #000;
+            box-shadow: 0 0 20px var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Animations Keyframes */
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink {
+            from, to { border-color: transparent }
+            50% { border-color: var(--primary-color) }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Moustafa Radwan</h1>
-        <p>Cyber Security Student & Penetration Tester</p>
-        <div class="email">Email: moustafa@mradwan.me</div>
-        <br><br>
+        <h1 class="typing-effect">Moustafa Radwan_</h1>
+        
+        <p>Cyber Security Enthusiast | Pentester</p>
+        
+        <span class="email">moustafa@mradwan.me</span>
+
         <div class="social-links">
-            <a href="#">GitHub</a>
-            <a href="#">LinkedIn</a>
+            <a href="https://www.linkedin.com/in/moustafa-radwan-b41127253/" target="_blank" class="btn">LinkedIn</a>
+            
+            <a href="https://github.com/Cyberbyte077" target="_blank" class="btn">GitHub</a>
         </div>
-        <p style="font-size: 0.8em; margin-top: 40px;">Under Construction - Coming Soon</p>
     </div>
+
 </body>
 </html>
