@@ -1,196 +1,505 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moustafa Radwan | Cyber Security Interactive</title>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: #000; }
-        canvas { display: block; }
-        
-        /* UI Overlay */
-        #ui-layer {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #00ff41; /* Matrix Green */
-            font-family: 'Courier New', Courier, monospace;
-            pointer-events: none; /* Let clicks pass through to 3D */
-            z-index: 10;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moustafa Radwan | Cyber Security Interactive</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-1: #020611;
+      --bg-2: #07111f;
+      --neon: #6df1a5;
+      --neon-2: #42c3ff;
+      --muted: #9db3c6;
+      --panel: rgba(8, 18, 32, 0.75);
+      --glass: rgba(8, 18, 32, 0.45);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(120% 120% at 20% 20%, #0b1f36 0%, #01050d 50%, #000 100%);
+      color: #e9f7ff;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+    }
+    canvas { display: block; }
 
-        h1 {
-            font-size: 2.5rem;
-            margin: 0;
-            text-shadow: 0 0 10px #00ff41;
-        }
+    /* Glow grid overlay */
+    .grid {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mix-blend-mode: soft-light;
+      opacity: 0.25;
+      pointer-events: none;
+      transform: translateZ(0);
+      animation: gridFloat 16s ease-in-out infinite alternate;
+    }
+    @keyframes gridFloat {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to   { transform: translate3d(10px, -20px, 0) scale(1.02); }
+    }
 
-        p {
-            font-size: 1.2rem;
-            color: #fff;
-        }
+    /* Neon vignette */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 20% 20%, rgba(66,195,255,0.18) 0%, transparent 35%),
+                  radial-gradient(circle at 80% 30%, rgba(109,241,165,0.2) 0%, transparent 32%),
+                  radial-gradient(circle at 50% 80%, rgba(255,255,255,0.08) 0%, transparent 28%);
+      filter: blur(8px);
+    }
 
-        .controls {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #888;
-            font-family: sans-serif;
-            font-size: 0.8rem;
-            pointer-events: none;
-        }
+    /* UI Layer */
+    #ui-layer {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 10;
+      pointer-events: none;
+      display: grid;
+      gap: 8px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid rgba(109,241,165,0.4);
+      background: rgba(4, 10, 16, 0.5);
+      border-radius: 999px;
+      font-family: 'DM Mono', monospace;
+      color: var(--neon);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      box-shadow: 0 0 12px rgba(109,241,165,0.25);
+      pointer-events: auto;
+    }
+    h1 {
+      margin: 4px 0 0 0;
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: 0.02em;
+      text-shadow: 0 0 12px rgba(109,241,165,0.45);
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'DM Mono', monospace;
+      color: #d7e9ff;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 12px var(--neon);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 1; }
+    }
 
-        /* Buttons */
-        .btn-container {
-            position: absolute;
-            top: 50%;
-            right: 50px;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            pointer-events: auto;
-        }
+    /* Button stack */
+    .btn-container {
+      position: fixed;
+      top: 50%;
+      right: 40px;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 10;
+    }
+    .cyber-btn {
+      background: var(--glass);
+      border: 1px solid rgba(109,241,165,0.6);
+      color: #eafff3;
+      padding: 14px 18px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      transition: 0.25s ease;
+      backdrop-filter: blur(12px);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 10px;
+      box-shadow:
+        0 0 0 1px rgba(66,195,255,0.1),
+        0 8px 24px rgba(0,0,0,0.45);
+      pointer-events: auto;
+      position: relative;
+      overflow: hidden;
+    }
+    .cyber-btn span {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(109,241,165,0.12), transparent);
+      transform: translateX(-120%);
+      transition: transform 0.4s ease;
+    }
+    .cyber-btn:hover span { transform: translateX(120%); }
+    .cyber-btn:hover {
+      background: rgba(109,241,165,0.12);
+      color: var(--neon);
+      box-shadow:
+        0 0 16px rgba(109,241,165,0.4),
+        0 12px 28px rgba(0,0,0,0.6);
+      translate: 0 -1px;
+    }
 
-        .cyber-btn {
-            background: rgba(0, 20, 0, 0.7);
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 15px 30px;
-            font-family: 'Courier New', monospace;
-            text-decoration: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: 0.3s;
-            backdrop-filter: blur(5px);
-            cursor: pointer;
-        }
+    .controls {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      pointer-events: none;
+      z-index: 10;
+    }
 
-        .cyber-btn:hover {
-            background: #00ff41;
-            color: #000;
-            box-shadow: 0 0 20px #00ff41;
-        }
-    </style>
+    /* Corner metrics */
+    .metrics {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      display: grid;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      color: var(--muted);
+      background: rgba(4,10,16,0.5);
+      border: 1px solid rgba(66,195,255,0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      z-index: 10;
+      pointer-events: none;
+    }
+    .metrics strong { color: #e9f7ff; }
+
+    /* Hero blurb */
+    .hero-card {
+      position: fixed;
+      top: 22%;
+      left: 24px;
+      max-width: 420px;
+      padding: 16px 18px;
+      background: var(--panel);
+      border: 1px solid rgba(66,195,255,0.2);
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+      pointer-events: none;
+      z-index: 10;
+      backdrop-filter: blur(16px);
+    }
+    .hero-card p { margin: 0; color: #c9d8ea; line-height: 1.5; }
+
+    /* HUD circles */
+    .hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      mix-blend-mode: screen;
+    }
+    .hud::before, .hud::after {
+      content: "";
+      position: absolute;
+      border: 1px solid rgba(109,241,165,0.25);
+      border-radius: 50%;
+      inset: 22% 20%;
+      animation: ringPulse 9s ease-in-out infinite;
+    }
+    .hud::after {
+      inset: 26% 24%;
+      border-color: rgba(66,195,255,0.22);
+      animation-direction: reverse;
+      animation-duration: 11s;
+    }
+    @keyframes ringPulse {
+      0%,100% { transform: scale(1); opacity: 0.35; }
+      50% { transform: scale(1.05); opacity: 0.15; }
+    }
+
+    @media (max-width: 900px) {
+      .btn-container { right: 20px; top: auto; bottom: 80px; transform: none; }
+      .hero-card { top: 140px; max-width: min(90vw, 480px); }
+      h1 { font-size: 28px; }
+    }
+  </style>
 </head>
 <body>
+  <div class="grid"></div>
+  <div class="vignette"></div>
+  <div class="hud"></div>
 
-    <div id="ui-layer">
-        <h1>Moustafa Radwan</h1>
-        <p>Target: Global Infrastructure</p>
-        <p>Status: <span id="status">Scanning...</span></p>
-    </div>
+  <div id="ui-layer">
+    <div class="badge">Cyber Defense • Interactive</div>
+    <h1>Moustafa Radwan</h1>
+    <p class="subtitle">Targeting resilient global infrastructure, zero-trust telemetry, and adversary-resistant systems.</p>
+    <div class="status-line"><span class="dot"></span><span id="status">Scanning...</span></div>
+  </div>
 
-    <div class="btn-container">
-        <a href="https://github.com/Cyberbyte077" target="_blank" class="cyber-btn">Github Access</a>
-        <a href="mailto:moustafa@mradwan.me" class="cyber-btn">Contact Node</a>
-        <a href="#" class="cyber-btn">View Projects</a>
-    </div>
+  <div class="hero-card">
+    <p>
+      Cyber security engineer crafting immersive threat-visualization interfaces, offensive/defensive simulations,
+      and resilient network topologies. Obsessed with signal, clarity, and verifiable trust.
+    </p>
+  </div>
 
-    <div class="controls">Click & Drag to Rotate the Network</div>
+  <div class="btn-container">
+    <a class="cyber-btn" href="https://github.com/Cyberbyte077" target="_blank" rel="noopener">
+      <span aria-hidden="true"></span> Github Access →
+    </a>
+    <a class="cyber-btn" href="mailto:moustafa@mradwan.me">
+      <span aria-hidden="true"></span> Contact Node →
+    </a>
+    <a class="cyber-btn" href="https://www.linkedin.com/in/moustafa-radwan-b41127253" target="_blank" rel="noopener">
+      <span aria-hidden="true"></span> LinkedIn Relay →
+    </a>
+    <a class="cyber-btn" href="#projects" id="projects-btn">
+      <span aria-hidden="true"></span> View Projects →
+    </a>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <div class="controls">Click & Drag to rotate • Scroll to adjust depth • Double-tap to refocus</div>
 
-    <script>
-        // --- 1. SETUP SCENE ---
-        const scene = new THREE.Scene();
-        // Add subtle fog for depth
-        scene.fog = new THREE.FogExp2(0x000000, 0.002);
+  <div class="metrics" id="metrics">
+    <div><strong>Nodes:</strong> 0</div>
+    <div><strong>Latency:</strong> -- ms</div>
+    <div><strong>Uptime:</strong> --:--:--</div>
+  </div>
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 5;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    // ----------- 1) SCENE -----------
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x02040a, 0.025);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 120);
+    camera.position.set(0, 0, 8);
 
-        // --- 2. CONTROLS (Interaction) ---
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.enableZoom = false; // Disable zoom to keep layout clean
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.body.appendChild(renderer.domElement);
 
-        // --- 3. OBJECTS (The Cyber Globe) ---
-        
-        // A. Wireframe Sphere
-        const geometry = new THREE.IcosahedronGeometry(2, 2); // Shape
-        const wireframeMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0x00ff41, 
-            wireframe: true,
-            transparent: true,
-            opacity: 0.3
-        });
-        const sphere = new THREE.Mesh(geometry, wireframeMaterial);
-        scene.add(sphere);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.enablePan = false;
+    controls.minDistance = 5;
+    controls.maxDistance = 12;
 
-        // B. Particles (The Data Points)
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 700;
-        const posArray = new Float32Array(particlesCount * 3);
+    // ----------- 2) LIGHTS -----------
+    const ambient = new THREE.AmbientLight(0x66fff2, 0.45);
+    const pointA = new THREE.PointLight(0x42c3ff, 1.6, 18);
+    pointA.position.set(6, 6, 4);
+    const pointB = new THREE.PointLight(0x6df1a5, 1.2, 14);
+    pointB.position.set(-5, -3, -4);
+    scene.add(ambient, pointA, pointB);
 
-        for(let i = 0; i < particlesCount * 3; i++) {
-            // Spread particles around smoothly
-            posArray[i] = (Math.random() - 0.5) * 15; 
-        }
+    // ----------- 3) CORE GLOBE -----------
+    const globeGeo = new THREE.IcosahedronGeometry(2.4, 3);
+    const wireMat = new THREE.MeshBasicMaterial({
+      color: 0x6df1a5,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.28
+    });
+    const globe = new THREE.Mesh(globeGeo, wireMat);
+    scene.add(globe);
 
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.02,
-            color: 0x00ff41,
-            transparent: true,
-            opacity: 0.8,
-        });
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
+    // Halo
+    const haloGeo = new THREE.SphereGeometry(2.7, 48, 48);
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0x42c3ff,
+      transparent: true,
+      opacity: 0.08,
+      side: THREE.BackSide
+    });
+    const halo = new THREE.Mesh(haloGeo, haloMat);
+    scene.add(halo);
 
-        // --- 4. ANIMATION LOOP ---
-        const clock = new THREE.Clock();
+    // ----------- 4) PARTICLE FIELD -----------
+    const particlesCount = 1400;
+    const particlePositions = new Float32Array(particlesCount * 3);
+    const particleSpeeds = new Float32Array(particlesCount);
+    for (let i = 0; i < particlesCount; i++) {
+      const i3 = i * 3;
+      particlePositions[i3 + 0] = (Math.random() - 0.5) * 16;
+      particlePositions[i3 + 1] = (Math.random() - 0.5) * 16;
+      particlePositions[i3 + 2] = (Math.random() - 0.5) * 16;
+      particleSpeeds[i] = 0.001 + Math.random() * 0.004;
+    }
+    const particleGeo = new THREE.BufferGeometry();
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
 
-        function animate() {
-            requestAnimationFrame(animate);
-            const elapsedTime = clock.getElapsedTime();
+    const particleMat = new THREE.PointsMaterial({
+      size: 0.02,
+      color: 0x9cf5ff,
+      transparent: true,
+      opacity: 0.9
+    });
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
 
-            // Rotate Sphere
-            sphere.rotation.y += 0.002;
-            sphere.rotation.x += 0.001;
+    // ----------- 5) ORBITING NODES -----------
+    const nodeGroup = new THREE.Group();
+    const nodeMat = new THREE.MeshStandardMaterial({
+      color: 0x6df1a5,
+      emissive: 0x154c2f,
+      emissiveIntensity: 0.9,
+      metalness: 0.1,
+      roughness: 0.2
+    });
+    const nodePositions = [
+      new THREE.Vector3(1.2, 0.8, 2.1),
+      new THREE.Vector3(-1.4, -1.0, -2.0),
+      new THREE.Vector3(0.2, 1.6, -1.5),
+      new THREE.Vector3(-2.0, 0.5, 1.8),
+      new THREE.Vector3(1.8, -1.4, 0.6)
+    ];
+    nodePositions.forEach((pos) => {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), nodeMat);
+      m.position.copy(pos);
+      nodeGroup.add(m);
+    });
+    scene.add(nodeGroup);
 
-            // Rotate Particles (Opposite direction for effect)
-            particlesMesh.rotation.y = -elapsedTime * 0.05;
-            particlesMesh.rotation.x = elapsedTime * 0.02;
+    // ----------- 6) CONNECTION LINES -----------
+    const lineMat = new THREE.LineBasicMaterial({
+      color: 0x42c3ff,
+      transparent: true,
+      opacity: 0.5
+    });
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(nodePositions.concat(nodePositions[0]));
+    const lines = new THREE.LineLoop(lineGeo, lineMat);
+    scene.add(lines);
 
-            // Make the sphere "breathe" (pulse)
-            const scale = 1 + Math.sin(elapsedTime * 2) * 0.03;
-            sphere.scale.set(scale, scale, scale);
+    // ----------- 7) RINGS -----------
+    const ringGroup = new THREE.Group();
+    for (let i = 0; i < 3; i++) {
+      const ringGeo = new THREE.RingGeometry(2.7 + i * 0.35, 2.72 + i * 0.35, 128);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: i % 2 === 0 ? 0x6df1a5 : 0x42c3ff,
+        transparent: true,
+        opacity: 0.12,
+        side: THREE.DoubleSide
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.random() * Math.PI;
+      ring.rotation.y = Math.random() * Math.PI;
+      ringGroup.add(ring);
+    }
+    scene.add(ringGroup);
 
-            // Update controls
-            controls.update();
+    // ----------- 8) STATUS / HUD -----------
+    const statusSpan = document.getElementById('status');
+    const states = [
+      'Scanning...',
+      'Encrypting Channels',
+      'Hardening Surface',
+      'Analyzing Packets',
+      'Threat Intel Sync',
+      'Zero-Trust Enforcement'
+    ];
+    let stateIdx = 0;
+    setInterval(() => {
+      stateIdx = (stateIdx + 1) % states.length;
+      statusSpan.textContent = states[stateIdx];
+    }, 2600);
 
-            renderer.render(scene, camera);
-        }
+    const metrics = document.getElementById('metrics');
+    const t0 = Date.now();
+    const latencyBase = 14;
+    const latencyJitter = 9;
 
-        animate();
+    // ----------- 9) INTERACTION -----------
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
-        // --- 5. RESPONSIVE RESIZE ---
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+    // Projects button smooth scroll (placeholder target)
+    const projectsBtn = document.getElementById('projects-btn');
+    projectsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      controls.reset();
+      camera.position.set(0, 0, 6.2);
+    });
 
-        // --- 6. HACKER TYPING EFFECT FOR STATUS ---
-        const statusSpan = document.getElementById('status');
-        const states = ["Scanning...", "Secure", "Analyzing Packets", "Encryption Active"];
-        let stateIdx = 0;
+    // ----------- 10) ANIMATE -----------
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
 
-        setInterval(() => {
-            stateIdx = (stateIdx + 1) % states.length;
-            statusSpan.innerText = states[stateIdx];
-        }, 3000);
+      globe.rotation.y += 0.0025;
+      globe.rotation.x += 0.0008;
 
-    </script>
+      halo.material.opacity = 0.06 + Math.sin(t * 1.5) * 0.02;
+      halo.scale.setScalar(1.01 + Math.sin(t * 0.8) * 0.01);
+
+      ringGroup.children.forEach((ring, i) => {
+        ring.rotation.z += (i % 2 === 0 ? 1 : -1) * 0.0006;
+        ring.material.opacity = 0.08 + Math.sin(t * 1.2 + i) * 0.04;
+      });
+
+      nodeGroup.children.forEach((node, i) => {
+        node.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.001 + i * 0.0004);
+        node.position.applyAxisAngle(new THREE.Vector3(1, 0, 0), 0.0007);
+      });
+      lines.geometry.attributes.position.needsUpdate = true;
+
+      const pos = particles.geometry.attributes.position.array;
+      for (let i = 0; i < particlesCount; i++) {
+        const i3 = i * 3;
+        pos[i3 + 1] += particleSpeeds[i];
+        if (pos[i3 + 1] > 8) pos[i3 + 1] = -8;
+      }
+      particles.geometry.attributes.position.needsUpdate = true;
+      particles.rotation.y = -t * 0.02;
+      particles.rotation.x = t * 0.01;
+
+      controls.update();
+      renderer.render(scene, camera);
+
+      // HUD metrics update
+      const uptimeMs = Date.now() - t0;
+      const s = Math.floor(uptimeMs / 1000);
+      const h = String(Math.floor(s / 3600)).padStart(2, '0');
+      const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+      const sec = String(s % 60).padStart(2, '0');
+      const latency = (latencyBase + Math.abs(Math.sin(t * 2.2)) * latencyJitter).toFixed(1);
+      metrics.innerHTML = `
+        <div><strong>Nodes:</strong> ${nodeGroup.children.length}</div>
+        <div><strong>Latency:</strong> ${latency} ms</div>
+        <div><strong>Uptime:</strong> ${h}:${m}:${sec}</div>
+      `;
+    }
+    animate();
+  </script>
 </body>
 </html>
