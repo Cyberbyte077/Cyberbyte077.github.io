@@ -1,203 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Moustafa Radwan | Cyber Defense Interface</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    /* same styling as before, unchanged for brevity */
-    :root { --bg-1:#020611; --bg-2:#07111f; --neon:#6df1a5; --neon-2:#42c3ff; --muted:#9db3c6; }
-    *{box-sizing:border-box;} body{margin:0;overflow:hidden;background:radial-gradient(120% 120% at 18% 18%,#0b1f36 0%,#01050d 50%,#000 100%);color:#e9f7ff;font-family:'Space Grotesk',system-ui,sans-serif;} canvas{display:block;}
-    #ui-layer{position:fixed;top:20px;left:20px;z-index:10;display:grid;gap:6px;pointer-events:none;}
-    .badge{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;border:1px solid rgba(109,241,165,0.4);background:rgba(4,10,16,0.55);font-family:'DM Mono',monospace;letter-spacing:0.08em;color:var(--neon);text-transform:uppercase;font-size:12px;pointer-events:auto;}
-    h1{margin:2px 0 0;font-size:clamp(28px,4vw,44px);letter-spacing:0.02em;text-shadow:0 0 12px rgba(109,241,165,0.45);}
-    .subtitle{margin:0;color:var(--muted);font-weight:500;max-width:520px;}
-    .status-line{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;color:#d7e9ff;}
-    .dot{width:10px;height:10px;border-radius:50%;background:var(--neon);box-shadow:0 0 12px var(--neon);animation:pulse 1.6s ease-in-out infinite;}
-    @keyframes pulse{0%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:0.4}100%{transform:scale(1);opacity:1}}
-    .hero-card{position:fixed;top:22%;left:20px;max-width:460px;padding:14px 16px;background:rgba(8,16,28,0.7);border:1px solid rgba(66,195,255,0.2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.55);backdrop-filter:blur(14px);pointer-events:none;z-index:10;}
-    .hero-card p{margin:0;color:#c9d8ea;line-height:1.5;}
-    .btn-container{position:fixed;top:50%;right:34px;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;z-index:10;}
-    .cyber-btn{background:rgba(8,16,28,0.55);border:1px solid rgba(109,241,165,0.55);color:#eafff3;padding:13px 16px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;gap:10px;border-radius:10px;backdrop-filter:blur(12px);box-shadow:0 0 0 1px rgba(66,195,255,0.08),0 10px 24px rgba(0,0,0,0.5);position:relative;overflow:hidden;transition:0.22s ease;pointer-events:auto;}
-    .cyber-btn span{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(109,241,165,0.12),transparent);transform:translateX(-120%);transition:transform 0.4s ease;}
-    .cyber-btn:hover span{transform:translateX(120%);} .cyber-btn:hover{color:var(--neon);box-shadow:0 0 16px rgba(109,241,165,0.35),0 14px 32px rgba(0,0,0,0.6);translate:0 -1px;}
-    .controls{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.08em;pointer-events:none;z-index:10;}
-    .metrics{position:fixed;bottom:20px;left:20px;display:grid;gap:6px;font-family:'DM Mono',monospace;color:var(--muted);background:rgba(4,10,16,0.55);border:1px solid rgba(66,195,255,0.22);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.45);z-index:10;pointer-events:none;}
-    .metrics strong{color:#e9f7ff;} .toggle{position:fixed;top:20px;right:20px;z-index:10;pointer-events:auto;background:rgba(8,16,28,0.7);color:#dfefff;border:1px solid rgba(66,195,255,0.35);font-family:'DM Mono',monospace;padding:10px 12px;border-radius:10px;backdrop-filter:blur(12px);box-shadow:0 10px 24px rgba(0,0,0,0.5);cursor:pointer;letter-spacing:0.06em;}
-    .hud{position:fixed;inset:0;pointer-events:none;z-index:5;mix-blend-mode:screen;}
-    .hud::before,.hud::after{content:"";position:absolute;border:1px solid rgba(109,241,165,0.2);border-radius:50%;inset:23% 20%;animation:ringPulse 9s ease-in-out infinite;}
-    .hud::after{inset:27% 24%;border-color:rgba(66,195,255,0.18);animation-direction:reverse;animation-duration:11s;}
-    @keyframes ringPulse{0%,100%{transform:scale(1);opacity:0.34}50%{transform:scale(1.05);opacity:0.16}}
-    .grid{position:fixed;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(0deg,rgba(255,255,255,0.05) 1px,transparent 1px);background-size:80px 80px;mix-blend-mode:soft-light;opacity:0.22;pointer-events:none;animation:gridFloat 16s ease-in-out infinite alternate;}
-    @keyframes gridFloat{from{transform:translate3d(0,0,0) scale(1);}to{transform:translate3d(12px,-18px,0) scale(1.02);}}
-    .vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 18%,rgba(66,195,255,0.16) 0%,transparent 32%),radial-gradient(circle at 82% 28%,rgba(109,241,165,0.2) 0%,transparent 30%),radial-gradient(circle at 50% 82%,rgba(255,255,255,0.06) 0%,transparent 24%);filter:blur(8px);}
-    @media(max-width:900px){.btn-container{right:18px;top:auto;bottom:80px;transform:none;} .hero-card{top:140px;max-width:min(92vw,520px);} h1{font-size:30px;}}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moustafa Radwan | Cybersecurity Analyst</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- Reset & Base Styles --- */
+        :root {
+            --primary-color: #2c3e50; /* Dark Blue - Professional */
+            --secondary-color: #3498db; /* Light Blue - Accent */
+            --bg-color: #f8f9fa; /* Light Gray Background */
+            --text-color: #333;
+            --card-bg: #fff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* --- Layout & Container --- */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* --- Header / Hero Section --- */
+        .hero {
+            min-height: 90vh; /* Almost full screen height */
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center horizontally */
+            text-align: center; /* Center text */
+            padding-top: 4rem;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        /* --- Profile Image --- */
+        .profile-img-container {
+            margin-bottom: 2rem;
+            display: inline-block;
+            position: relative;
+        }
+
+        .profile-img-container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 100%;
+            height: 100%;
+            border: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            z-index: -1;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-img-container:hover::before {
+            transform: scale(1.05);
+        }
+
+        .profile-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--card-bg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* --- Typography & Animations --- */
+        .greeting {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            /* Typewriter Effect */
+            overflow: hidden;
+            border-right: .15em solid var(--secondary-color);
+            white-space: nowrap;
+            margin: 0 auto 1rem;
+            letter-spacing: .05em;
+            animation: typing 3.5s steps(30, end), blink-caret .75s step-end infinite;
+            max-width: fit-content;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .bio-text {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            color: #555;
+        }
+
+        /* --- Social Links & Buttons --- */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .social-icon {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .social-icon:hover {
+            color: var(--card-bg);
+            background: var(--secondary-color);
+            transform: translateY(-5px);
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background-color: var(--secondary-color);
+            color: #fff;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -10px rgba(52, 152, 219, 0.5);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px -10px rgba(52, 152, 219, 0.7);
+            background-color: #2980b9;
+        }
+
+        /* --- "What I Do" Section --- */
+        .what-i-do {
+            padding: 5rem 0;
+            background-color: var(--card-bg);
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: var(--secondary-color);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }
+
+        .skill-card {
+            background: var(--bg-color);
+            padding: 2.5rem;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .skill-card:hover {
+            background: var(--card-bg);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-color: var(--secondary-color);
+            transform: translateY(-5px);
+        }
+
+        .skill-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .skill-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .skill-card p {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            background: var(--primary-color);
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        /* --- Keyframes Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--secondary-color) }
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.2rem; }
+            .hero { padding-top: 2rem; min-height: auto; padding-bottom: 4rem;}
+            .profile-img { width: 150px; height: 150px; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .skill-card { text-align: center; }
+        }
+    </style>
 </head>
 <body>
-  <div class="grid"></div><div class="vignette"></div><div class="hud"></div>
-  <div id="ui-layer">
-    <div class="badge">Cyber Defense • Interactive</div>
-    <h1>Moustafa Radwan</h1>
-    <p class="subtitle">Zero-trust telemetry, adversary simulation, and resilient global infrastructure visualization.</p>
-    <div class="status-line"><span class="dot"></span><span id="status">Scanning...</span></div>
-  </div>
-  <div class="hero-card"><p>Cyber security engineer crafting immersive threat-visualization interfaces and offensive/defensive simulations. Focused on verifiable trust, clarity, and resilient network topologies.</p></div>
-  <div class="btn-container">
-    <a class="cyber-btn" href="https://github.com/Cyberbyte077" target="_blank" rel="noopener"><span aria-hidden="true"></span> Github Access →</a>
-    <a class="cyber-btn" href="mailto:moustafa@mradwan.me"><span aria-hidden="true"></span> Contact Node →</a>
-    <a class="cyber-btn" href="https://www.linkedin.com/in/moustafa-radwan-b41127253" target="_blank" rel="noopener"><span aria-hidden="true"></span> LinkedIn Relay →</a>
-    <a class="cyber-btn" href="#projects" id="projects-btn"><span aria-hidden="true"></span> View Projects →</a>
-  </div>
-  <div class="controls">Drag to rotate • Scroll to adjust depth • Tap to refocus</div>
-  <div class="metrics" id="metrics">
-    <div><strong>Nodes:</strong> 0</div><div><strong>Latency:</strong> -- ms</div><div><strong>Uptime:</strong> --:--:--</div>
-  </div>
-  <button class="toggle" id="perfToggle">Performance: High</button>
 
-  <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js';
-    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/controls/OrbitControls.js';
-    import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/postprocessing/RenderPass.js';
-    import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/postprocessing/UnrealBloomPass.js';
-    import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/postprocessing/ShaderPass.js';
-    import { RGBShiftShader } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/shaders/RGBShiftShader.js';
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="profile-img-container">
+                    <img src="your-photo.jpg" alt="Moustafa Radwan" class="profile-img">
+                </div>
+                
+                <span class="greeting">Hello, I'm</span>
+                <h1>Moustafa Radwan</h1>
+                <h2>Cybersecurity Analyst & Penetration Tester</h2>
+                
+                <p class="bio-text">
+                    I help organizations secure their digital assets by identifying vulnerabilities before attackers do. 
+                    Specializing in network security, web application testing, and cloud infrastructure defense.
+                </p>
 
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x02040a, 0.028);
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 150);
-    camera.position.set(0, 0, 8);
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/in/moustafa-radwan-b41127253/" target="_blank" class="social-icon" title="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://github.com/Cyberbyte077" target="_blank" class="social-icon" title="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="mailto:moustafa@mradwan.me" class="social-icon" title="Email">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    document.body.appendChild(renderer.domElement);
+                <a href="mailto:moustafa@mradwan.me" class="btn-primary">Get In Touch</a>
+            </div>
+        </div>
+    </section>
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false; controls.minDistance = 5; controls.maxDistance = 12;
+    <section class="what-i-do">
+        <div class="container">
+            <h2 class="section-title">What I Do</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Vulnerability Assessment</h3>
+                    <p>Proactively scanning and analyzing systems to find security loopholes and provide actionable remediation plans.</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fas fa-network-wired"></i></div>
+                    <h3>Network Penetration Testing</h3>
+                    <p>Simulating real-world attacks on network infrastructure to test defenses and identify weak points.</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fas fa-cloud"></i></div>
+                    <h3>Cloud Security</h3>
+                    <p>Ensuring the security of cloud environments (Azure/AWS) through configuration reviews and best practices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    // Postprocessing
-    const composer = new EffectComposer(renderer);
-    const renderPass = new RenderPass(scene, camera);
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.9, 0.9, 0.01);
-    const rgbShiftPass = new ShaderPass(RGBShiftShader);
-    rgbShiftPass.uniforms['amount'].value = 0.0008;
-    composer.addPass(renderPass); composer.addPass(bloomPass); composer.addPass(rgbShiftPass);
+    <footer>
+        <p>© 2025 Moustafa Radwan. All rights reserved.</p>
+    </footer>
 
-    // Lights
-    scene.add(new THREE.AmbientLight(0x66fff2, 0.45));
-    const l1 = new THREE.PointLight(0x42c3ff, 1.5, 18); l1.position.set(6, 6, 4);
-    const l2 = new THREE.PointLight(0x6df1a5, 1.1, 14); l2.position.set(-5, -3, -4);
-    scene.add(l1, l2);
-
-    // Globe + halo
-    const globe = new THREE.Mesh(new THREE.IcosahedronGeometry(2.4, 3), new THREE.MeshBasicMaterial({ color: 0x6df1a5, wireframe: true, transparent: true, opacity: 0.28 }));
-    scene.add(globe);
-    const halo = new THREE.Mesh(new THREE.SphereGeometry(2.7, 48, 48), new THREE.MeshBasicMaterial({ color: 0x42c3ff, transparent: true, opacity: 0.08, side: THREE.BackSide }));
-    scene.add(halo);
-
-    // Particles
-    const particleCount = 2200;
-    const pGeo = new THREE.BufferGeometry();
-    const pPos = new Float32Array(particleCount * 3);
-    const pSpeed = new Float32Array(particleCount);
-    for (let i = 0; i < particleCount; i++) {
-      const i3 = i * 3;
-      pPos[i3] = (Math.random() - 0.5) * 18;
-      pPos[i3 + 1] = (Math.random() - 0.5) * 18;
-      pPos[i3 + 2] = (Math.random() - 0.5) * 18;
-      pSpeed[i] = 0.001 + Math.random() * 0.0045;
-    }
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-    const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.022, color: 0x9cf5ff, transparent: true, opacity: 0.9 }));
-    scene.add(particles);
-
-    // Nodes + lines
-    const nodeGroup = new THREE.Group();
-    const nodeMat = new THREE.MeshStandardMaterial({ color: 0x6df1a5, emissive: 0x154c2f, emissiveIntensity: 0.9, metalness: 0.12, roughness: 0.2 });
-    const nodePositions = [
-      new THREE.Vector3(1.2, 0.8, 2.1), new THREE.Vector3(-1.4, -1.0, -2.0), new THREE.Vector3(0.2, 1.6, -1.5),
-      new THREE.Vector3(-2.0, 0.5, 1.8), new THREE.Vector3(1.8, -1.4, 0.6), new THREE.Vector3(0.0, -2.0, 1.2)
-    ];
-    nodePositions.forEach(pos => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), nodeMat); m.position.copy(pos); nodeGroup.add(m); });
-    scene.add(nodeGroup);
-    const lineMat = new THREE.LineBasicMaterial({ color: 0x42c3ff, transparent: true, opacity: 0.55 });
-    const lineGeo = new THREE.BufferGeometry().setFromPoints([...nodePositions, nodePositions[0]]);
-    const lines = new THREE.LineLoop(lineGeo, lineMat);
-    scene.add(lines);
-
-    // Rings
-    const ringGroup = new THREE.Group();
-    for (let i = 0; i < 3; i++) {
-      const ring = new THREE.Mesh(new THREE.RingGeometry(2.7 + i * 0.35, 2.72 + i * 0.35, 128), new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0x6df1a5 : 0x42c3ff, transparent: true, opacity: 0.12, side: THREE.DoubleSide }));
-      ring.rotation.x = Math.random() * Math.PI; ring.rotation.y = Math.random() * Math.PI; ringGroup.add(ring);
-    }
-    scene.add(ringGroup);
-
-    // Status + metrics
-    const statusSpan = document.getElementById('status');
-    const states = ['Scanning...', 'Encrypting Channels', 'Hardening Surface', 'Analyzing Packets', 'Threat Intel Sync', 'Zero-Trust Enforcement', 'Adversary Simulation'];
-    let stateIdx = 0;
-    setInterval(() => { stateIdx = (stateIdx + 1) % states.length; statusSpan.textContent = states[stateIdx]; }, 2400);
-
-    const metrics = document.getElementById('metrics');
-    const t0 = Date.now(); const latencyBase = 12; const latencyJitter = 11;
-
-    // Resize
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight); bloomPass.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // Projects button
-    document.getElementById('projects-btn').addEventListener('click', (e) => { e.preventDefault(); controls.reset(); camera.position.set(0, 0, 6.5); });
-
-    // Performance toggle
-    const perfToggle = document.getElementById('perfToggle'); let highPerf = true;
-    perfToggle.addEventListener('click', () => {
-      highPerf = !highPerf;
-      renderer.setPixelRatio(highPerf ? Math.min(window.devicePixelRatio, 2) : 1.1);
-      bloomPass.strength = highPerf ? 0.9 : 0.45;
-      rgbShiftPass.enabled = highPerf;
-      perfToggle.textContent = highPerf ? 'Performance: High' : 'Performance: Lite';
-    });
-
-    // Animate
-    const clock = new THREE.Clock();
-    function animate() {
-      requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-
-      globe.rotation.y += 0.0028; globe.rotation.x += 0.0009;
-      halo.material.opacity = 0.06 + Math.sin(t * 1.5) * 0.02;
-      halo.scale.setScalar(1.01 + Math.sin(t * 0.8) * 0.012);
-
-      ringGroup.children.forEach((ring, i) => { ring.rotation.z += (i % 2 === 0 ? 1 : -1) * 0.0007; ring.material.opacity = 0.08 + Math.sin(t * 1.2 + i) * 0.04; });
-
-      nodeGroup.children.forEach((node, i) => {
-        node.position.applyAxisAngle(new THREE.Vector3(0,1,0), 0.001 + i * 0.00035);
-        node.position.applyAxisAngle(new THREE.Vector3(1,0,0), 0.0006);
-      });
-      lines.geometry.attributes.position.needsUpdate = true;
-
-      const pos = particles.geometry.attributes.position.array;
-      for (let i = 0; i < particleCount; i++) { const i3 = i * 3; pos[i3 + 1] += pSpeed[i]; if (pos[i3 + 1] > 9) pos[i3 + 1] = -9; }
-      particles.geometry.attributes.position.needsUpdate = true;
-      particles.rotation.y = -t * 0.018; particles.rotation.x = t * 0.009;
-
-      controls.update();
-      composer.render();
-
-      // HUD metrics
-      const uptimeMs = Date.now() - t0; const s = Math.floor(uptimeMs / 1000);
-      const h = String(Math.floor(s / 3600)).padStart(2, '0'); const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0'); const sec = String(s % 60).padStart(2, '0');
-      const latency = (latencyBase + Math.abs(Math.sin(t * 2.2)) * latencyJitter).toFixed(1);
-      metrics.innerHTML = `<div><strong>Nodes:</strong> ${nodeGroup.children.length}</div><div><strong>Latency:</strong> ${latency} ms</div><div><strong>Uptime:</strong> ${h}:${m}:${sec}</div>`;
-    }
-    animate();
-  </script>
 </body>
 </html>
