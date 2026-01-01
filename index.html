@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Moustafa Radwan | Cyber Security Interactive</title>
+  <title>Moustafa Radwan | Cyber Defense Interface</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -13,237 +13,107 @@
       --neon: #6df1a5;
       --neon-2: #42c3ff;
       --muted: #9db3c6;
-      --panel: rgba(8, 18, 32, 0.75);
-      --glass: rgba(8, 18, 32, 0.45);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       overflow: hidden;
-      background: radial-gradient(120% 120% at 20% 20%, #0b1f36 0%, #01050d 50%, #000 100%);
+      background: radial-gradient(120% 120% at 18% 18%, #0b1f36 0%, #01050d 50%, #000 100%);
       color: #e9f7ff;
       font-family: 'Space Grotesk', system-ui, sans-serif;
     }
     canvas { display: block; }
 
-    /* Glow grid overlay */
-    .grid {
-      position: fixed;
-      inset: 0;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-      background-size: 80px 80px;
-      mix-blend-mode: soft-light;
-      opacity: 0.25;
-      pointer-events: none;
-      transform: translateZ(0);
-      animation: gridFloat 16s ease-in-out infinite alternate;
-    }
-    @keyframes gridFloat {
-      from { transform: translate3d(0, 0, 0) scale(1); }
-      to   { transform: translate3d(10px, -20px, 0) scale(1.02); }
-    }
-
-    /* Neon vignette */
-    .vignette {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background: radial-gradient(circle at 20% 20%, rgba(66,195,255,0.18) 0%, transparent 35%),
-                  radial-gradient(circle at 80% 30%, rgba(109,241,165,0.2) 0%, transparent 32%),
-                  radial-gradient(circle at 50% 80%, rgba(255,255,255,0.08) 0%, transparent 28%);
-      filter: blur(8px);
-    }
-
-    /* UI Layer */
+    /* Overlay UI */
     #ui-layer {
-      position: fixed;
-      top: 24px;
-      left: 24px;
-      z-index: 10;
-      pointer-events: none;
-      display: grid;
-      gap: 8px;
+      position: fixed; top: 20px; left: 20px; z-index: 10;
+      display: grid; gap: 6px; pointer-events: none;
     }
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-radius: 999px;
       border: 1px solid rgba(109,241,165,0.4);
-      background: rgba(4, 10, 16, 0.5);
-      border-radius: 999px;
-      font-family: 'DM Mono', monospace;
-      color: var(--neon);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 12px;
-      box-shadow: 0 0 12px rgba(109,241,165,0.25);
+      background: rgba(4,10,16,0.55);
+      font-family: 'DM Mono', monospace; letter-spacing: 0.08em;
+      color: var(--neon); text-transform: uppercase; font-size: 12px;
       pointer-events: auto;
     }
-    h1 {
-      margin: 4px 0 0 0;
-      font-size: clamp(28px, 4vw, 42px);
-      letter-spacing: 0.02em;
-      text-shadow: 0 0 12px rgba(109,241,165,0.45);
-    }
-    .subtitle {
-      margin: 0;
-      color: var(--muted);
-      font-weight: 500;
-    }
-    .status-line {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'DM Mono', monospace;
-      color: #d7e9ff;
-    }
-    .dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--neon);
-      box-shadow: 0 0 12px var(--neon);
-      animation: pulse 1.6s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.4; }
-      100% { transform: scale(1); opacity: 1; }
-    }
+    h1 { margin: 2px 0 0; font-size: clamp(28px, 4vw, 44px); letter-spacing: 0.02em; text-shadow: 0 0 12px rgba(109,241,165,0.45); }
+    .subtitle { margin: 0; color: var(--muted); font-weight: 500; max-width: 520px; }
+    .status-line { display: flex; align-items: center; gap: 10px; font-family: 'DM Mono', monospace; color: #d7e9ff; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 12px var(--neon); animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:0.4} 100%{transform:scale(1);opacity:1} }
 
-    /* Button stack */
-    .btn-container {
-      position: fixed;
-      top: 50%;
-      right: 40px;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      z-index: 10;
-    }
-    .cyber-btn {
-      background: var(--glass);
-      border: 1px solid rgba(109,241,165,0.6);
-      color: #eafff3;
-      padding: 14px 18px;
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      text-decoration: none;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      transition: 0.25s ease;
-      backdrop-filter: blur(12px);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      border-radius: 10px;
-      box-shadow:
-        0 0 0 1px rgba(66,195,255,0.1),
-        0 8px 24px rgba(0,0,0,0.45);
-      pointer-events: auto;
-      position: relative;
-      overflow: hidden;
-    }
-    .cyber-btn span {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(109,241,165,0.12), transparent);
-      transform: translateX(-120%);
-      transition: transform 0.4s ease;
-    }
-    .cyber-btn:hover span { transform: translateX(120%); }
-    .cyber-btn:hover {
-      background: rgba(109,241,165,0.12);
-      color: var(--neon);
-      box-shadow:
-        0 0 16px rgba(109,241,165,0.4),
-        0 12px 28px rgba(0,0,0,0.6);
-      translate: 0 -1px;
-    }
-
-    .controls {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    /* Corner metrics */
-    .metrics {
-      position: fixed;
-      bottom: 24px;
-      left: 24px;
-      display: grid;
-      gap: 6px;
-      font-family: 'DM Mono', monospace;
-      color: var(--muted);
-      background: rgba(4,10,16,0.5);
-      border: 1px solid rgba(66,195,255,0.2);
-      border-radius: 10px;
-      padding: 10px 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-      z-index: 10;
-      pointer-events: none;
-    }
-    .metrics strong { color: #e9f7ff; }
-
-    /* Hero blurb */
     .hero-card {
-      position: fixed;
-      top: 22%;
-      left: 24px;
-      max-width: 420px;
-      padding: 16px 18px;
-      background: var(--panel);
-      border: 1px solid rgba(66,195,255,0.2);
-      border-radius: 12px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.55);
-      pointer-events: none;
-      z-index: 10;
-      backdrop-filter: blur(16px);
+      position: fixed; top: 22%; left: 20px; max-width: 460px;
+      padding: 14px 16px; background: rgba(8,16,28,0.7);
+      border: 1px solid rgba(66,195,255,0.2); border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55); backdrop-filter: blur(14px);
+      pointer-events: none; z-index: 10;
     }
     .hero-card p { margin: 0; color: #c9d8ea; line-height: 1.5; }
 
-    /* HUD circles */
-    .hud {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 5;
-      mix-blend-mode: screen;
+    .btn-container {
+      position: fixed; top: 50%; right: 34px; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 14px; z-index: 10;
     }
+    .cyber-btn {
+      background: rgba(8,16,28,0.55); border: 1px solid rgba(109,241,165,0.55);
+      color: #eafff3; padding: 13px 16px; font-family: 'DM Mono', monospace; font-size: 12px;
+      letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 10px; border-radius: 10px;
+      backdrop-filter: blur(12px); box-shadow: 0 0 0 1px rgba(66,195,255,0.08), 0 10px 24px rgba(0,0,0,0.5);
+      position: relative; overflow: hidden; transition: 0.22s ease; pointer-events: auto;
+    }
+    .cyber-btn span { position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(109,241,165,0.12), transparent); transform: translateX(-120%); transition: transform 0.4s ease; }
+    .cyber-btn:hover span { transform: translateX(120%); }
+    .cyber-btn:hover { color: var(--neon); box-shadow: 0 0 16px rgba(109,241,165,0.35), 0 14px 32px rgba(0,0,0,0.6); translate: 0 -1px; }
+
+    .controls { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em; pointer-events: none; z-index: 10; }
+    .metrics {
+      position: fixed; bottom: 20px; left: 20px; display: grid; gap: 6px; font-family: 'DM Mono', monospace;
+      color: var(--muted); background: rgba(4,10,16,0.55); border: 1px solid rgba(66,195,255,0.22); border-radius: 10px;
+      padding: 10px 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); z-index: 10; pointer-events: none;
+    }
+    .metrics strong { color: #e9f7ff; }
+
+    .toggle {
+      position: fixed; top: 20px; right: 20px; z-index: 10; pointer-events: auto;
+      background: rgba(8,16,28,0.7); color: #dfefff; border: 1px solid rgba(66,195,255,0.35);
+      font-family: 'DM Mono', monospace; padding: 10px 12px; border-radius: 10px;
+      backdrop-filter: blur(12px); box-shadow: 0 10px 24px rgba(0,0,0,0.5); cursor: pointer; letter-spacing: 0.06em;
+    }
+
+    /* HUD rings */
+    .hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; mix-blend-mode: screen; }
     .hud::before, .hud::after {
-      content: "";
-      position: absolute;
-      border: 1px solid rgba(109,241,165,0.25);
-      border-radius: 50%;
-      inset: 22% 20%;
-      animation: ringPulse 9s ease-in-out infinite;
+      content: ""; position: absolute; border: 1px solid rgba(109,241,165,0.2);
+      border-radius: 50%; inset: 23% 20%; animation: ringPulse 9s ease-in-out infinite;
     }
-    .hud::after {
-      inset: 26% 24%;
-      border-color: rgba(66,195,255,0.22);
-      animation-direction: reverse;
-      animation-duration: 11s;
+    .hud::after { inset: 27% 24%; border-color: rgba(66,195,255,0.18); animation-direction: reverse; animation-duration: 11s; }
+    @keyframes ringPulse { 0%,100%{transform:scale(1);opacity:0.34} 50%{transform:scale(1.05);opacity:0.16} }
+
+    /* Grid + vignette */
+    .grid {
+      position: fixed; inset: 0; background:
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 80px 80px; mix-blend-mode: soft-light; opacity: 0.22; pointer-events: none; animation: gridFloat 16s ease-in-out infinite alternate;
     }
-    @keyframes ringPulse {
-      0%,100% { transform: scale(1); opacity: 0.35; }
-      50% { transform: scale(1.05); opacity: 0.15; }
+    @keyframes gridFloat { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(12px,-18px,0) scale(1.02); } }
+    .vignette {
+      position: fixed; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(66,195,255,0.16) 0%, transparent 32%),
+        radial-gradient(circle at 82% 28%, rgba(109,241,165,0.2) 0%, transparent 30%),
+        radial-gradient(circle at 50% 82%, rgba(255,255,255,0.06) 0%, transparent 24%);
+      filter: blur(8px);
     }
 
     @media (max-width: 900px) {
-      .btn-container { right: 20px; top: auto; bottom: 80px; transform: none; }
-      .hero-card { top: 140px; max-width: min(90vw, 480px); }
-      h1 { font-size: 28px; }
+      .btn-container { right: 18px; top: auto; bottom: 80px; transform: none; }
+      .hero-card { top: 140px; max-width: min(92vw, 520px); }
+      h1 { font-size: 30px; }
     }
   </style>
 </head>
@@ -255,48 +125,44 @@
   <div id="ui-layer">
     <div class="badge">Cyber Defense • Interactive</div>
     <h1>Moustafa Radwan</h1>
-    <p class="subtitle">Targeting resilient global infrastructure, zero-trust telemetry, and adversary-resistant systems.</p>
+    <p class="subtitle">Zero-trust telemetry, adversary simulation, and resilient global infrastructure visualization.</p>
     <div class="status-line"><span class="dot"></span><span id="status">Scanning...</span></div>
   </div>
 
   <div class="hero-card">
-    <p>
-      Cyber security engineer crafting immersive threat-visualization interfaces, offensive/defensive simulations,
-      and resilient network topologies. Obsessed with signal, clarity, and verifiable trust.
-    </p>
+    <p>Cyber security engineer crafting immersive threat-visualization interfaces and offensive/defensive simulations. Focused on verifiable trust, clarity, and resilient network topologies.</p>
   </div>
 
   <div class="btn-container">
-    <a class="cyber-btn" href="https://github.com/Cyberbyte077" target="_blank" rel="noopener">
-      <span aria-hidden="true"></span> Github Access →
-    </a>
-    <a class="cyber-btn" href="mailto:moustafa@mradwan.me">
-      <span aria-hidden="true"></span> Contact Node →
-    </a>
-    <a class="cyber-btn" href="https://www.linkedin.com/in/moustafa-radwan-b41127253" target="_blank" rel="noopener">
-      <span aria-hidden="true"></span> LinkedIn Relay →
-    </a>
-    <a class="cyber-btn" href="#projects" id="projects-btn">
-      <span aria-hidden="true"></span> View Projects →
-    </a>
+    <a class="cyber-btn" href="https://github.com/Cyberbyte077" target="_blank" rel="noopener"><span aria-hidden="true"></span> Github Access →</a>
+    <a class="cyber-btn" href="mailto:moustafa@mradwan.me"><span aria-hidden="true"></span> Contact Node →</a>
+    <a class="cyber-btn" href="https://www.linkedin.com/in/moustafa-radwan-b41127253" target="_blank" rel="noopener"><span aria-hidden="true"></span> LinkedIn Relay →</a>
+    <a class="cyber-btn" href="#projects" id="projects-btn"><span aria-hidden="true"></span> View Projects →</a>
   </div>
 
-  <div class="controls">Click & Drag to rotate • Scroll to adjust depth • Double-tap to refocus</div>
-
+  <div class="controls">Drag to rotate • Scroll to adjust depth • Tap to refocus</div>
   <div class="metrics" id="metrics">
     <div><strong>Nodes:</strong> 0</div>
     <div><strong>Latency:</strong> -- ms</div>
     <div><strong>Uptime:</strong> --:--:--</div>
   </div>
+  <button class="toggle" id="perfToggle">Performance: High</button>
 
+  <!-- Three.js + Postprocessing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/js/controls/OrbitControls.js"></script>
-  <script>
-    // ----------- 1) SCENE -----------
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x02040a, 0.025);
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/js/shaders/RGBShiftShader.js"></script>
 
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 120);
+  <script>
+    // ---------- SCENE ----------
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x02040a, 0.028);
+
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 150);
     camera.position.set(0, 0, 8);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -311,182 +177,162 @@
     controls.minDistance = 5;
     controls.maxDistance = 12;
 
-    // ----------- 2) LIGHTS -----------
-    const ambient = new THREE.AmbientLight(0x66fff2, 0.45);
-    const pointA = new THREE.PointLight(0x42c3ff, 1.6, 18);
-    pointA.position.set(6, 6, 4);
-    const pointB = new THREE.PointLight(0x6df1a5, 1.2, 14);
-    pointB.position.set(-5, -3, -4);
-    scene.add(ambient, pointA, pointB);
+    // ---------- POSTPROCESS ----------
+    const composer = new THREE.EffectComposer(renderer);
+    const renderPass = new THREE.RenderPass(scene, camera);
+    const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.9, 0.9, 0.01);
+    const rgbShiftPass = new THREE.ShaderPass(THREE.RGBShiftShader);
+    rgbShiftPass.uniforms['amount'].value = 0.0008;
+    composer.addPass(renderPass);
+    composer.addPass(bloomPass);
+    composer.addPass(rgbShiftPass);
 
-    // ----------- 3) CORE GLOBE -----------
-    const globeGeo = new THREE.IcosahedronGeometry(2.4, 3);
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x6df1a5,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.28
-    });
-    const globe = new THREE.Mesh(globeGeo, wireMat);
+    // ---------- LIGHTS ----------
+    scene.add(new THREE.AmbientLight(0x66fff2, 0.45));
+    const l1 = new THREE.PointLight(0x42c3ff, 1.5, 18); l1.position.set(6, 6, 4);
+    const l2 = new THREE.PointLight(0x6df1a5, 1.1, 14); l2.position.set(-5, -3, -4);
+    scene.add(l1, l2);
+
+    // ---------- GLOBE ----------
+    const globe = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(2.4, 3),
+      new THREE.MeshBasicMaterial({ color: 0x6df1a5, wireframe: true, transparent: true, opacity: 0.28 })
+    );
     scene.add(globe);
 
-    // Halo
-    const haloGeo = new THREE.SphereGeometry(2.7, 48, 48);
-    const haloMat = new THREE.MeshBasicMaterial({
-      color: 0x42c3ff,
-      transparent: true,
-      opacity: 0.08,
-      side: THREE.BackSide
-    });
-    const halo = new THREE.Mesh(haloGeo, haloMat);
+    const halo = new THREE.Mesh(
+      new THREE.SphereGeometry(2.7, 48, 48),
+      new THREE.MeshBasicMaterial({ color: 0x42c3ff, transparent: true, opacity: 0.08, side: THREE.BackSide })
+    );
     scene.add(halo);
 
-    // ----------- 4) PARTICLE FIELD -----------
-    const particlesCount = 1400;
-    const particlePositions = new Float32Array(particlesCount * 3);
-    const particleSpeeds = new Float32Array(particlesCount);
-    for (let i = 0; i < particlesCount; i++) {
+    // ---------- PARTICLES (GPU-friendly) ----------
+    const particleCount = 2200;
+    const pGeo = new THREE.BufferGeometry();
+    const pPos = new Float32Array(particleCount * 3);
+    const pSpeed = new Float32Array(particleCount);
+    for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
-      particlePositions[i3 + 0] = (Math.random() - 0.5) * 16;
-      particlePositions[i3 + 1] = (Math.random() - 0.5) * 16;
-      particlePositions[i3 + 2] = (Math.random() - 0.5) * 16;
-      particleSpeeds[i] = 0.001 + Math.random() * 0.004;
+      pPos[i3] = (Math.random() - 0.5) * 18;
+      pPos[i3 + 1] = (Math.random() - 0.5) * 18;
+      pPos[i3 + 2] = (Math.random() - 0.5) * 18;
+      pSpeed[i] = 0.001 + Math.random() * 0.0045;
     }
-    const particleGeo = new THREE.BufferGeometry();
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-
-    const particleMat = new THREE.PointsMaterial({
-      size: 0.02,
-      color: 0x9cf5ff,
-      transparent: true,
-      opacity: 0.9
-    });
-    const particles = new THREE.Points(particleGeo, particleMat);
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+    const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.022, color: 0x9cf5ff, transparent: true, opacity: 0.9 }));
     scene.add(particles);
 
-    // ----------- 5) ORBITING NODES -----------
+    // ---------- NODES + LINES ----------
     const nodeGroup = new THREE.Group();
-    const nodeMat = new THREE.MeshStandardMaterial({
-      color: 0x6df1a5,
-      emissive: 0x154c2f,
-      emissiveIntensity: 0.9,
-      metalness: 0.1,
-      roughness: 0.2
-    });
+    const nodeMat = new THREE.MeshStandardMaterial({ color: 0x6df1a5, emissive: 0x154c2f, emissiveIntensity: 0.9, metalness: 0.12, roughness: 0.2 });
     const nodePositions = [
       new THREE.Vector3(1.2, 0.8, 2.1),
       new THREE.Vector3(-1.4, -1.0, -2.0),
       new THREE.Vector3(0.2, 1.6, -1.5),
       new THREE.Vector3(-2.0, 0.5, 1.8),
-      new THREE.Vector3(1.8, -1.4, 0.6)
+      new THREE.Vector3(1.8, -1.4, 0.6),
+      new THREE.Vector3(0.0, -2.0, 1.2)
     ];
-    nodePositions.forEach((pos) => {
+    nodePositions.forEach(pos => {
       const m = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), nodeMat);
       m.position.copy(pos);
       nodeGroup.add(m);
     });
     scene.add(nodeGroup);
 
-    // ----------- 6) CONNECTION LINES -----------
-    const lineMat = new THREE.LineBasicMaterial({
-      color: 0x42c3ff,
-      transparent: true,
-      opacity: 0.5
-    });
-    const lineGeo = new THREE.BufferGeometry().setFromPoints(nodePositions.concat(nodePositions[0]));
+    const lineMat = new THREE.LineBasicMaterial({ color: 0x42c3ff, transparent: true, opacity: 0.55 });
+    const lineGeo = new THREE.BufferGeometry().setFromPoints([...nodePositions, nodePositions[0]]);
     const lines = new THREE.LineLoop(lineGeo, lineMat);
     scene.add(lines);
 
-    // ----------- 7) RINGS -----------
+    // ---------- RINGS ----------
     const ringGroup = new THREE.Group();
     for (let i = 0; i < 3; i++) {
-      const ringGeo = new THREE.RingGeometry(2.7 + i * 0.35, 2.72 + i * 0.35, 128);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: i % 2 === 0 ? 0x6df1a5 : 0x42c3ff,
-        transparent: true,
-        opacity: 0.12,
-        side: THREE.DoubleSide
-      });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(2.7 + i * 0.35, 2.72 + i * 0.35, 128),
+        new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0x6df1a5 : 0x42c3ff, transparent: true, opacity: 0.12, side: THREE.DoubleSide })
+      );
       ring.rotation.x = Math.random() * Math.PI;
       ring.rotation.y = Math.random() * Math.PI;
       ringGroup.add(ring);
     }
     scene.add(ringGroup);
 
-    // ----------- 8) STATUS / HUD -----------
+    // ---------- STATUS ----------
     const statusSpan = document.getElementById('status');
-    const states = [
-      'Scanning...',
-      'Encrypting Channels',
-      'Hardening Surface',
-      'Analyzing Packets',
-      'Threat Intel Sync',
-      'Zero-Trust Enforcement'
-    ];
+    const states = ['Scanning...', 'Encrypting Channels', 'Hardening Surface', 'Analyzing Packets', 'Threat Intel Sync', 'Zero-Trust Enforcement', 'Adversary Simulation'];
     let stateIdx = 0;
-    setInterval(() => {
-      stateIdx = (stateIdx + 1) % states.length;
-      statusSpan.textContent = states[stateIdx];
-    }, 2600);
+    setInterval(() => { stateIdx = (stateIdx + 1) % states.length; statusSpan.textContent = states[stateIdx]; }, 2400);
 
     const metrics = document.getElementById('metrics');
     const t0 = Date.now();
-    const latencyBase = 14;
-    const latencyJitter = 9;
+    const latencyBase = 12;
+    const latencyJitter = 11;
 
-    // ----------- 9) INTERACTION -----------
+    // ---------- RESIZE ----------
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+      bloomPass.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Projects button smooth scroll (placeholder target)
-    const projectsBtn = document.getElementById('projects-btn');
-    projectsBtn.addEventListener('click', (e) => {
+    // ---------- PROJECTS BUTTON ----------
+    document.getElementById('projects-btn').addEventListener('click', (e) => {
       e.preventDefault();
       controls.reset();
-      camera.position.set(0, 0, 6.2);
+      camera.position.set(0, 0, 6.5);
     });
 
-    // ----------- 10) ANIMATE -----------
+    // ---------- PERFORMANCE TOGGLE ----------
+    const perfToggle = document.getElementById('perfToggle');
+    let highPerf = true;
+    perfToggle.addEventListener('click', () => {
+      highPerf = !highPerf;
+      renderer.setPixelRatio(highPerf ? Math.min(window.devicePixelRatio, 2) : 1.1);
+      bloomPass.strength = highPerf ? 0.9 : 0.45;
+      rgbShiftPass.enabled = highPerf;
+      perfToggle.textContent = highPerf ? 'Performance: High' : 'Performance: Lite';
+    });
+
+    // ---------- ANIMATE ----------
     const clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      globe.rotation.y += 0.0025;
-      globe.rotation.x += 0.0008;
+      globe.rotation.y += 0.0028;
+      globe.rotation.x += 0.0009;
 
       halo.material.opacity = 0.06 + Math.sin(t * 1.5) * 0.02;
-      halo.scale.setScalar(1.01 + Math.sin(t * 0.8) * 0.01);
+      halo.scale.setScalar(1.01 + Math.sin(t * 0.8) * 0.012);
 
       ringGroup.children.forEach((ring, i) => {
-        ring.rotation.z += (i % 2 === 0 ? 1 : -1) * 0.0006;
+        ring.rotation.z += (i % 2 === 0 ? 1 : -1) * 0.0007;
         ring.material.opacity = 0.08 + Math.sin(t * 1.2 + i) * 0.04;
       });
 
       nodeGroup.children.forEach((node, i) => {
-        node.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.001 + i * 0.0004);
-        node.position.applyAxisAngle(new THREE.Vector3(1, 0, 0), 0.0007);
+        node.position.applyAxisAngle(new THREE.Vector3(0,1,0), 0.001 + i * 0.00035);
+        node.position.applyAxisAngle(new THREE.Vector3(1,0,0), 0.0006);
       });
       lines.geometry.attributes.position.needsUpdate = true;
 
       const pos = particles.geometry.attributes.position.array;
-      for (let i = 0; i < particlesCount; i++) {
+      for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3;
-        pos[i3 + 1] += particleSpeeds[i];
-        if (pos[i3 + 1] > 8) pos[i3 + 1] = -8;
+        pos[i3 + 1] += pSpeed[i];
+        if (pos[i3 + 1] > 9) pos[i3 + 1] = -9;
       }
       particles.geometry.attributes.position.needsUpdate = true;
-      particles.rotation.y = -t * 0.02;
-      particles.rotation.x = t * 0.01;
+      particles.rotation.y = -t * 0.018;
+      particles.rotation.x = t * 0.009;
 
       controls.update();
-      renderer.render(scene, camera);
+      composer.render();
 
-      // HUD metrics update
+      // HUD metrics
       const uptimeMs = Date.now() - t0;
       const s = Math.floor(uptimeMs / 1000);
       const h = String(Math.floor(s / 3600)).padStart(2, '0');
